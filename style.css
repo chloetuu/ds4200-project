@@ -97,6 +97,7 @@ iframe {
   margin-bottom: 10px;
   display: block;
   background: #fff;
+  border-radius: 8px;
 }
 
 .plotly-chart {
@@ -107,8 +108,21 @@ iframe {
   height: 550px;
 }
 
+.heatmap-chart {
+  max-width: 1400px;    
+  height: 450px;        
+}
+
+.candlestick-chart {
+  max-width: 975px;     
+  height: 520px;        
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .d3-chart {
-  height: 850px;
+  max-width: 1200px;
+  height: 800px;
 }
 
 img {
@@ -119,7 +133,7 @@ img {
   border-radius: 8px;
   background: #fff;
 }
-
+/* References */
 .references ul {
   margin: 0;
   padding-left: 20px;
