@@ -11,16 +11,18 @@
 </head>
 
 <body>
-
   <div class="container">
 
-    <!-- Intro -->
+    <!-- Hero / Intro -->
     <div class="hero">
       <h1>Analyzing Sector Performance and Top S&P 500 Stocks</h1>
       <p class="subtitle">
-        This project analyzes the performance of selected S&P 500 stocks and sector ETFs from 2022 to 2025.
-        The goal is to compare relative growth, identify sector differences, and understand how AI-related
-        companies and sectors have influenced the broader market.
+        This project analyzes the performance of selected S&P 500 stocks and sector ETFs from 2022 to 2025,
+        a period defined by the rise of AI-driven investment. As companies like NVIDIA, AMD, and Meta emerged
+        as central players in the broader economy, traditional sector relationships began to break down.
+        Our goal is to move from a broad view of sector-level trends down to the behavior of individual stocks,
+        using a combination of static and interactive visualizations to uncover how concentration, volatility,
+        and market sensitivity evolved over this critical period.
       </p>
     </div>
 
@@ -28,101 +30,132 @@
     <div class="info-block">
       <h2>Dataset Overview</h2>
       <p>
-        The dataset used in this project was collected using the yfinance Python library, which retrieves historical financial data from Yahoo Finance. 
-        It includes daily data for selected S&P 500 stocks and sector ETFs from 2022 to 2025, covering attributes such as open, high, low, close, adjusted close, and trading volume. 
-        Additional features were engineered, including daily returns, rolling volatility, moving averages, momentum indicators, and rolling beta relative to SPY. 
-        The dataset contains several thousand observations and more than ten features, including both continuous variables and categorical attributes.
+        The dataset was collected using the <strong>yfinance</strong> Python library, which retrieves historical
+        financial data from Yahoo Finance. It includes daily OHLCV data (open, high, low, close, adjusted close,
+        and trading volume) for selected S&P 500 stocks and sector ETFs spanning <strong>2022 to 2025</strong>.
+        Additional engineered features include daily returns, rolling volatility (7-day and 30-day),
+        moving averages, momentum indicators, and rolling beta relative to SPY.
+        The dataset contains <strong>over 10,000 observations</strong> and more than <strong>12 features</strong>,
+        including both continuous variables (price, return, beta) and categorical attributes (sector, ticker type).
+        Stocks analyzed include NVDA, AAPL, MSFT, AMD, META, GOOG, AMZN, TSLA, JPM, XOM, and LLY,
+        alongside 10 sector ETFs and the SPY market benchmark.
       </p>
     </div>
 
-    <!-- Interactivity Overview -->
-    <div class="info-block">
-      <h2>Interactivity</h2>
-      <p>
-        This project includes multiple forms of interactivity. Plotly charts allow zooming, hovering, and toggling data.
-        The Altair heatmap provides tooltips for detailed values, while the D3 visualization enables dynamic exploration
-        of sector trends over time. These features allow users to interact with the data and gain deeper insights.
-      </p>
-    </div>
-
-    <!-- Viz 1 -->
+    <!-- Viz 1: Heatmap -->
     <div class="section-card">
       <h2>Visualization 1: Sector ETF Monthly Return Heatmap</h2>
+      <p class="interaction-note">
+        🖱️ <strong>How to interact:</strong> Hover over any cell to see the exact sector, month, and return value in a tooltip.
+      </p>
       <iframe class="altair-chart heatmap-chart" src="visual2.html"></iframe>
       <p class="takeaway">
-        <strong>Takeaway:</strong> 
-        The heatmap reveals that the Technology and Consumer sectors experienced more consistent positive returns after 2023 
-        compared to other sectors. In contrast, sectors like Energy and Materials show more volatility 
-        and mixed performance. This indicates that AI-related industries have been a major contributor to recent market strength.
+        <strong>Takeaway:</strong>
+        The heatmap reveals that the 2022 bear market hit nearly every sector simultaneously — visible as a widespread
+        red band across all rows. The recovery from mid-2023 onward was strikingly uneven: Technology and Consumer
+        Discretionary sectors showed consistent green returns while Real Estate and Utilities remained largely flat
+        or negative. This pattern indicates that AI-related industries were the primary engine of recent market strength,
+        not broad economic recovery.
       </p>
     </div>
 
-    <!-- Viz 3 -->
+    <!-- Viz 2: Interactive Bar Chart -->
     <div class="section-card">
-      <h2>Visualization 2: Top Stocks in Selected Sector</h2>
-      <img src="visual3.png" alt="Top stocks by total return">
+      <h2>Visualization 2: Top Stocks by Sector Total Return</h2>
+      <p class="interaction-note">
+        🖱️ <strong>How to interact:</strong> Use the <strong>sector dropdown</strong> to switch between sectors and see
+        the top-performing stocks update instantly. Hover over any bar for the stock name and exact return percentage.
+      </p>
+      <iframe class="plotly-chart bar-chart" src="visual3.html"></iframe>
       <p class="takeaway">
-        <strong>Takeaway:</strong> 
-        This chart demonstrates that a small number of companies, led by NVDA, dominate total returns within the 
-        Technology sector. The large gap between NVDA and other stocks highlights how market performance is increasingly 
-        concentrated in a few high-growth firms. This reinforces the idea that sector performance is driven by top performers 
-        rather than evenly distributed growth.
+        <strong>Takeaway:</strong>
+        Across every sector, returns are heavily concentrated in one or two names rather than evenly distributed.
+        In Technology, NVDA's ~660% return dwarfs AMD (~89%), MSFT (~60%), and AAPL (~58%) — a gap so extreme it
+        suggests passive tech exposure carries significant single-stock risk. In Health Care, Eli Lilly similarly
+        dominates. This concentration pattern reinforces that sector-level ETF returns are driven by outliers,
+        not the average constituent.
       </p>
     </div>
 
-    <!-- Viz 4 -->
+    <!-- Viz 3: Candlestick -->
     <div class="section-card">
-      <h2>Visualization 3: Candlestick Chart</h2>
+      <h2>Visualization 3: NVDA Candlestick Chart</h2>
+      <p class="interaction-note">
+        🖱️ <strong>How to interact:</strong> Hover over any candle to see the open, high, low, and close prices.
+        Click and drag to zoom into a specific time range. Double-click to reset. Use the Plotly toolbar (top right)
+        to pan, zoom, or download.
+      </p>
       <iframe class="plotly-chart candlestick-chart" src="visual4.html"></iframe>
       <p class="takeaway">
         <strong>Takeaway:</strong>
-        The candlestick chart shows that while NVDA has experienced strong upward growth, it also exhibits significant 
-        short-term volatility. Large price swings indicate higher risk, even during periods of overall growth. 
-        This highlights the tradeoff between high returns and increased volatility in AI-driven stocks.
+        NVDA's candlestick chart shows that its price surge was not smooth — sharp drawdowns and volatile swings
+        occurred even during its overall uptrend, particularly around earnings events. This highlights the difference
+        between strong cumulative returns and the day-to-day risk experienced by holders, illustrating the tradeoff
+        between high returns and increased volatility in AI-driven stocks.
       </p>
     </div>
 
-    <!-- Viz 5 -->
+    <!-- Viz 4: Rolling Beta with ticker search -->
     <div class="section-card">
-      <h2>Visualization 4: Rolling Beta of Relative to SPY</h2>
-      <img src="visual5.png" alt="Rolling beta chart">
+      <h2>Visualization 4: 30-Day Rolling Beta vs SPY</h2>
+      <p class="interaction-note">
+        🖱️ <strong>How to interact:</strong> Type any ticker (e.g. NVDA, AAPL, TSLA, META) in the search box
+        or select from the autocomplete dropdown, then click <strong>Load</strong> to update the chart.
+        Hover over the line for exact date and beta values. Available tickers: NVDA, AAPL, MSFT, AMD, META,
+        GOOG, AMZN, TSLA, JPM, XOM, LLY, SPY.
+      </p>
+      <iframe class="plotly-chart stock-explorer-chart" src="visual5.html"></iframe>
       <p class="takeaway">
-        <strong>Takeaway:</strong> 
-        The rolling beta chart shows that NVDA’s sensitivity to market movements has increased over time, 
-        often remaining above 1. This suggests that NVDA is more volatile than the broader market and plays a growing role 
-        in influencing overall market behavior. Periods of extreme beta spikes reflect heightened market uncertainty and 
-        rapid price movements.
+        <strong>Takeaway:</strong>
+        NVDA's rolling beta rarely dropped below 1.5 and frequently exceeded 4, meaning it consistently amplified
+        market moves — both up and down. As institutional ownership grew, its sensitivity to broader market swings
+        intensified rather than normalized. Compare with defensive names like XOM or JPM to see how much more
+        stable their beta remains near 1 throughout the same period.
       </p>
     </div>
 
-    <!-- D3 Viz -->
+    <!-- Viz 5: D3 -->
     <div class="section-card">
-      <h2>Visualization 5: Sector Trends Explorer</h2>
+      <h2>Visualization 5: Interactive Sector Trends Explorer (D3)</h2>
+      <p class="interaction-note">
+        🖱️ <strong>How to interact:</strong> Hover over any line to highlight it and see the sector name, date,
+        and index value in a tooltip. <strong>Click any sector name</strong> in the legend to hide or show that
+        line — isolating specific sectors for direct comparison. Click again to bring it back.
+      </p>
       <iframe class="d3-chart" src="sector_d3.html"></iframe>
       <p class="takeaway">
         <strong>Takeaway:</strong>
-        The D3 visualization highlights how Technology began to diverge from other sectors after 2023, 
-        showing sustained upward performance relative to the rest of the market. Interactive exploration reveals that most other 
-        sectors remain relatively stable or cyclical, reinforcing the dominance of AI-driven industries in recent market trends.
+        Technology diverged sharply from all other sectors starting in early 2023 and never looked back.
+        Defensive sectors like Utilities, Consumer Staples, and Real Estate barely recovered to their 2022
+        starting levels by 2025. This visualization ties the whole project together — the sector-level divergence
+        seen here is the structural backdrop that drove NVDA's outsized individual returns shown above.
+        Try isolating Technology vs Real Estate in the legend for the starkest comparison.
       </p>
     </div>
 
-    <!-- Summary -->
+    <!-- Conclusion -->
     <div class="info-block">
       <h2>Key Findings and Conclusion</h2>
       <p>
-        The analysis reveals that market performance is increasingly driven by a small number of sectors and companies,
-        particularly in technology and AI-related industries. These firms significantly outperform broader benchmarks.
+        Three findings stand out from this analysis. First, the post-2023 market was not broadly strong —
+        it was <strong>narrow</strong>, driven almost entirely by AI-exposed technology stocks while defensive
+        sectors like Real Estate and Utilities remained flat or negative in real terms.
       </p>
-
       <p>
-        High-growth stocks also exhibit higher volatility and sensitivity to market movements, emphasizing the importance
-        of diversification in investment strategies.
+        Second, <strong>concentration within sectors is extreme</strong>: NVDA alone accounts for a
+        disproportionate share of Technology sector returns, meaning passive tech exposure carries significant
+        single-stock risk. The same pattern holds in Health Care (LLY) and Communication Services (META).
       </p>
-
       <p>
-        Future work could include incorporating macroeconomic data or expanding to a full S&P 500 dataset, as well as
-        developing a fully interactive dashboard for user-driven analysis.
+        Third, <strong>AI enthusiasm amplified risk rather than reducing it</strong>: NVDA's persistently high
+        and rising beta shows that as its weight in indices grew, it became more sensitive to market swings —
+        not less. High-growth AI stocks offer extraordinary returns alongside extraordinary volatility,
+        underscoring the importance of diversification.
+      </p>
+      <p>
+        Future work could extend this analysis through 2026, incorporate macroeconomic indicators such as Fed
+        rate decisions and CPI as event markers, and broaden the individual stock analysis beyond Technology
+        to test whether similar concentration patterns exist in Energy or Financials.
       </p>
     </div>
 
@@ -137,13 +170,12 @@
         </li>
         <li>
           <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7092977/" target="_blank">
-            Concentration of Trading in S&P 500 Stocks – PMC Article
+            Concentration of Trading in S&P 500 Stocks (Evolutionary Disruption of S&P 500 Trading Concentration) – PMC
           </a>
         </li>
       </ul>
     </div>
 
   </div>
-
 </body>
 </html>
