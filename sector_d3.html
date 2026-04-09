@@ -12,6 +12,17 @@
     body {
       font-family: "Inter", sans-serif;
       margin: 30px;
+      background: white;
+      color: #111827;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+    }
+
+    p {
+      max-width: 1000px;
+      margin-bottom: 10px;
     }
 
     .tooltip {
@@ -23,24 +34,40 @@
       font-size: 13px;
       pointer-events: none;
       opacity: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .line {
       fill: none;
-      stroke-width: 2;
+      stroke-width: 2.5;
     }
 
     .legend {
       cursor: pointer;
       font-size: 13px;
     }
+
+    .axis-label {
+      font-size: 14px;
+      fill: #111827;
+    }
+
+    .chart-title {
+      font-size: 20px;
+      font-weight: 600;
+      fill: #111827;
+    }
   </style>
 </head>
 
 <body>
   <h2>Interactive Sector Trends Explorer</h2>
-  <p>Explore how sector ETFs performed over time. Hover for details and click the legend to hide or show sectors.</p>
-  <p><strong>Key takeaway:</strong> Technology began to separate from most other sectors after 2023, reflecting the strength of AI-driven market growth.</p>
+  <p>
+    Explore how sector ETFs performed over time. Hover for details and click the legend to hide or show sectors.
+  </p>
+  <p>
+    <strong>Key takeaway:</strong> Technology began to separate from most other sectors after 2023, reflecting the strength of AI-driven market growth.
+  </p>
 
   <svg width="1200" height="550"></svg>
   <div class="tooltip"></div>
@@ -49,30 +76,44 @@
     const svg = d3.select("svg");
     const tooltip = d3.select(".tooltip");
 
-    const margin = { top: 50, right: 220, bottom: 50, left: 70 };
+    const margin = { top: 50, right: 220, bottom: 60, left: 80 };
     const width = 1200 - margin.left - margin.right;
     const height = 550 - margin.top - margin.bottom;
 
     const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
-
     d3.csv("monthly_prices_long.csv").then(data => {
       data.forEach(d => {
         d.Date = new Date(d.Date);
         d.Base100_Monthly = +d.Base100_Monthly;
       });
 
-      const grouped = d3.groups(data, d => d.Sector);
+      // Keep only sector ETFs with valid values
+      const sectorData = data.filter(d =>
+        d.Type === "Sector ETF" &&
+        d.Sector &&
+        !isNaN(d.Base100_Monthly)
+      );
+
+      // Sort for line drawing + tooltip lookup
+      sectorData.sort((a, b) => a.Date - b.Date);
+
+      const grouped = d3.groups(sectorData, d => d.Sector)
+        .map(([sector, values]) => [
+          sector,
+          values.sort((a, b) => a.Date - b.Date)
+        ]);
 
       const x = d3.scaleTime()
-        .domain(d3.extent(data, d => d.Date))
+        .domain(d3.extent(sectorData, d => d.Date))
         .range([0, width]);
 
       const y = d3.scaleLinear()
         .domain([
-          d3.min(data, d => d.Base100_Monthly) * 0.95,
-          d3.max(data, d => d.Base100_Monthly) * 1.05
+          d3.min(sectorData, d => d.Base100_Monthly) * 0.95,
+          d3.max(sectorData, d => d.Base100_Monthly) * 1.05
         ])
+        .nice()
         .range([height, 0]);
 
       const color = d3.scaleOrdinal()
@@ -83,6 +124,7 @@
         .x(d => x(d.Date))
         .y(d => y(d.Base100_Monthly));
 
+      // Axes
       g.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x));
@@ -90,27 +132,32 @@
       g.append("g")
         .call(d3.axisLeft(y));
 
+      // Title
       g.append("text")
+        .attr("class", "chart-title")
         .attr("x", width / 2)
         .attr("y", -20)
         .attr("text-anchor", "middle")
-        .style("font-size", "20px")
-        .style("font-weight", "600")
         .text("Sector ETF Performance Over Time (Base 100)");
 
+      // X label
       g.append("text")
+        .attr("class", "axis-label")
         .attr("x", width / 2)
-        .attr("y", height + 40)
+        .attr("y", height + 45)
         .attr("text-anchor", "middle")
         .text("Date");
 
+      // Y label
       g.append("text")
+        .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", -50)
+        .attr("y", -55)
         .attr("text-anchor", "middle")
         .text("Index (Base 100)");
 
+      // Sector lines
       const sectorLines = g.selectAll(".sector-line")
         .data(grouped)
         .enter()
@@ -121,18 +168,16 @@
         .attr("id", d => d[0].replace(/\s+/g, ""));
 
       sectorLines
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function() {
           d3.select(this).attr("stroke-width", 4);
         })
         .on("mousemove", function(event, d) {
           const [mx] = d3.pointer(event, g.node());
-
-          const dates = d[1];
           const xDate = x.invert(mx);
 
-          const bisect = d3.bisector(e => e.Date).left;
-          const index = bisect(dates, xDate);
-          const point = dates[Math.min(index, dates.length - 1)];
+          const bisect = d3.bisector(e => e.Date).center;
+          const idx = bisect(d[1], xDate);
+          const point = d[1][Math.max(0, Math.min(idx, d[1].length - 1))];
 
           tooltip
             .style("opacity", 1)
@@ -141,20 +186,21 @@
               Date: ${point.Date.toLocaleDateString()}<br>
               Index: ${point.Base100_Monthly.toFixed(2)}
             `)
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY - 20) + "px");
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY - 20}px`);
         })
         .on("mouseout", function() {
-          d3.select(this).attr("stroke-width", 2);
+          d3.select(this).attr("stroke-width", 2.5);
           tooltip.style("opacity", 0);
         });
 
+      // Legend
       const legend = svg.selectAll(".legend")
         .data(grouped)
         .enter()
         .append("g")
         .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(${width + 110}, ${80 + i * 22})`)
+        .attr("transform", (d, i) => `translate(${width + margin.left + 30}, ${margin.top + 20 + i * 24})`)
         .on("click", function(event, d) {
           const id = d[0].replace(/\s+/g, "");
           const selectedLine = d3.select(`#${id}`);
@@ -178,6 +224,12 @@
         .attr("x", 18)
         .attr("y", 10)
         .text(d => d[0]);
+    }).catch(error => {
+      console.error("Error loading CSV:", error);
+      d3.select("body")
+        .append("p")
+        .style("color", "red")
+        .text("Could not load data file. Check that monthly_prices_long.csv exists in the correct location.");
     });
   </script>
 </body>
