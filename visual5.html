@@ -85,9 +85,8 @@
         d.Base100_Monthly = +d.Base100_Monthly;
       });
 
-      // Keep only sector ETFs with valid values
+      // Keep only rows with valid values
       const sectorData = data.filter(d =>
-        d.Type === "Sector ETF" &&
         d.Sector &&
         !isNaN(d.Base100_Monthly)
       );
