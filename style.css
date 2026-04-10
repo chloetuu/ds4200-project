@@ -20,7 +20,7 @@ body {
   color: var(--text);
   line-height: 1.7;
 }
-
+/* Centering */
 .container {
   max-width: 1300px;
   margin: 0 auto;
@@ -51,7 +51,7 @@ p {
   text-align: center;
   color: var(--muted);
 }
-
+/* Centering */
 .hero {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(34, 197, 94, 0.08));
   border: 1px solid var(--border);
@@ -60,12 +60,12 @@ p {
   margin-bottom: 36px;
   box-shadow: var(--shadow);
 }
-
+/* Intro */
 .hero p {
   text-align: center;
   color: var(--muted);
 }
-
+/* Sections */
 .section-card,
 .info-block,
 .references {
@@ -76,7 +76,7 @@ p {
   margin-bottom: 28px;
   box-shadow: var(--shadow);
 }
-
+/* Summary */
 .takeaway {
   margin-top: 14px;
   padding: 14px 16px;
@@ -89,27 +89,11 @@ p {
 .takeaway strong {
   color: #f8fafc;
 }
-
-/* Interaction instruction note */
-.interaction-note {
-  margin: 0 0 8px;
-  padding: 10px 14px;
-  background: rgba(34, 197, 94, 0.07);
-  border-left: 4px solid #22c55e;
-  border-radius: 8px;
-  color: #bbf7d0;
-  font-size: 14px;
-}
-
-.interaction-note strong {
-  color: #f0fdf4;
-}
-
 /* Charts */
 iframe {
   width: 100%;
   border: none;
-  margin-top: 10px;
+  margin-top: 15px;
   margin-bottom: 10px;
   display: block;
   background: #fff;
@@ -117,31 +101,27 @@ iframe {
 }
 
 .plotly-chart {
-  height: 700px;
+  height: 520px;
 }
 
 .altair-chart {
-  height: 550px;
+  height: 450px;
 }
 
 .heatmap-chart {
   max-width: 1200px;
-  height: 450px;
-}
-
-.bar-chart {
-  height: 520px;
+  height: 450px;        
 }
 
 .candlestick-chart {
-  max-width: 975px;
-  height: 520px;
+  max-width: 975px;     
+  height: 540px;        
   margin-left: auto;
   margin-right: auto;
 }
 
 .stock-explorer-chart {
-  height: 620px;
+  height: 540px;
 }
 
 .d3-chart {
@@ -157,7 +137,7 @@ img {
   border-radius: 8px;
   background: #fff;
 }
-
+/* References */
 .references ul {
   margin: 0;
   padding-left: 20px;
@@ -176,7 +156,7 @@ a:hover {
   text-decoration: underline;
   color: #7dd3fc;
 }
-
+/* Applying Responsive Styles */
 @media (max-width: 768px) {
   .container {
     padding: 24px 16px 50px;
@@ -207,9 +187,5 @@ a:hover {
 
   .d3-chart {
     height: 760px;
-  }
-
-  .stock-explorer-chart {
-    height: 580px;
   }
 }
