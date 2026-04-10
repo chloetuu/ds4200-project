@@ -4,25 +4,13 @@
   <meta charset="UTF-8" />
   <title>D3 Sector Performance</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
     body {
       font-family: "Inter", sans-serif;
-      margin: 30px;
+      margin: 0;
       background: white;
       color: #111827;
-    }
-
-    h2 {
-      margin-bottom: 8px;
-    }
-
-    p {
-      max-width: 1000px;
-      margin-bottom: 10px;
     }
 
     .tooltip {
@@ -61,12 +49,9 @@
 </head>
 
 <body>
-  <h2>Interactive Sector Trends Explorer</h2>
-  <p>
-    Explore how sector ETFs performed over time. Hover for details and click the legend to hide or show sectors.
-  </p>
 
-  <svg width="1200" height="550"></svg>
+  <!-- Responsive SVG -->
+  <svg width="100%" height="550" viewBox="0 0 1200 550"></svg>
   <div class="tooltip"></div>
 
   <script>
@@ -79,27 +64,32 @@
 
     const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
+
     d3.csv("monthly_prices_long.csv").then(data => {
+
+      // Parse data
       data.forEach(d => {
         d.Date = new Date(d.Date);
         d.Base100_Monthly = +d.Base100_Monthly;
       });
 
-      // Keep only rows with valid values
+      // ✅ FIXED FILTER (REMOVED d.Type)
       const sectorData = data.filter(d =>
         d.Sector &&
         !isNaN(d.Base100_Monthly)
       );
 
-      // Sort for line drawing + tooltip lookup
+      // Sort
       sectorData.sort((a, b) => a.Date - b.Date);
 
+      // Group by sector
       const grouped = d3.groups(sectorData, d => d.Sector)
         .map(([sector, values]) => [
           sector,
           values.sort((a, b) => a.Date - b.Date)
         ]);
 
+      // Scales
       const x = d3.scaleTime()
         .domain(d3.extent(sectorData, d => d.Date))
         .range([0, width]);
@@ -136,7 +126,7 @@
         .attr("text-anchor", "middle")
         .text("Sector ETF Performance Over Time (Base 100)");
 
-      // X label
+      // Labels
       g.append("text")
         .attr("class", "axis-label")
         .attr("x", width / 2)
@@ -144,7 +134,6 @@
         .attr("text-anchor", "middle")
         .text("Date");
 
-      // Y label
       g.append("text")
         .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
@@ -153,7 +142,7 @@
         .attr("text-anchor", "middle")
         .text("Index (Base 100)");
 
-      // Sector lines
+      // Lines
       const sectorLines = g.selectAll(".sector-line")
         .data(grouped)
         .enter()
@@ -163,6 +152,7 @@
         .attr("d", d => line(d[1]))
         .attr("id", d => d[0].replace(/\s+/g, ""));
 
+      // Hover interaction
       sectorLines
         .on("mouseover", function() {
           d3.select(this).attr("stroke-width", 4);
@@ -196,7 +186,9 @@
         .enter()
         .append("g")
         .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(${width + margin.left + 30}, ${margin.top + 20 + i * 24})`)
+        .attr("transform", (d, i) =>
+          `translate(${width + margin.left + 30}, ${margin.top + 20 + i * 24})`
+        )
         .on("click", function(event, d) {
           const id = d[0].replace(/\s+/g, "");
           const selectedLine = d3.select(`#${id}`);
@@ -220,13 +212,11 @@
         .attr("x", 18)
         .attr("y", 10)
         .text(d => d[0]);
+
     }).catch(error => {
       console.error("Error loading CSV:", error);
-      d3.select("body")
-        .append("p")
-        .style("color", "red")
-        .text("Could not load data file. Check that monthly_prices_long.csv exists in the correct location.");
     });
   </script>
+
 </body>
 </html>
