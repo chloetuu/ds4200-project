@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Top Stocks by Sector</title>
+  <title>Top Stocks by Total Return</title>
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -12,134 +12,85 @@
       background: white;
       color: #111827;
     }
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    label {
-      font-weight: 600;
-      font-size: 14px;
-      color: #374151;
-    }
-    select {
-      padding: 8px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: "Inter", sans-serif;
-      background: white;
-      color: #111827;
-      cursor: pointer;
-    }
-    select:focus {
-      outline: none;
-      border-color: #38bdf8;
-    }
-    #chart {
-      width: 100%;
-      height: 420px;
-    }
+    #chart { width: 100%; height: 460px; }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <label for="sectorSelect">Select Sector:</label>
-    <select id="sectorSelect">
-      <option value="Technology">Technology</option>
-      <option value="Consumer Discretionary">Consumer Discretionary</option>
-      <option value="Financials">Financials</option>
-      <option value="Energy">Energy</option>
-      <option value="Health Care">Health Care</option>
-      <option value="Communication Services">Communication Services</option>
-    </select>
-  </div>
   <div id="chart"></div>
 
   <script>
-    // Stock data: sector -> [{ticker, name, totalReturn}]
-    // Total returns (%) calculated from 2022–2025 data in notebook
-    const stockData = {
-      "Technology": [
-        { ticker: "NVDA", name: "NVIDIA", ret: 662 },
-        { ticker: "AMD",  name: "AMD",    ret: 89  },
-        { ticker: "MSFT", name: "Microsoft", ret: 60 },
-        { ticker: "AAPL", name: "Apple",  ret: 58  }
-      ],
-      "Consumer Discretionary": [
-        { ticker: "TSLA", name: "Tesla",  ret: 95  },
-        { ticker: "AMZN", name: "Amazon", ret: 72  }
-      ],
-      "Financials": [
-        { ticker: "JPM",  name: "JPMorgan Chase", ret: 110 }
-      ],
-      "Energy": [
-        { ticker: "XOM",  name: "Exxon Mobil", ret: 45 }
-      ],
-      "Health Care": [
-        { ticker: "LLY",  name: "Eli Lilly", ret: 210 }
-      ],
-      "Communication Services": [
-        { ticker: "META", name: "Meta",    ret: 280 },
-        { ticker: "GOOG", name: "Alphabet", ret: 65 }
-      ]
-    };
-
-    const colors = [
-      "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd",
-      "#1d4ed8", "#1e40af"
+    const allStocks = [
+      { ticker: "NVDA", name: "NVIDIA",         sector: "Technology",              ret: 662 },
+      { ticker: "META", name: "Meta",            sector: "Communication Services",  ret: 280 },
+      { ticker: "LLY",  name: "Eli Lilly",       sector: "Health Care",             ret: 210 },
+      { ticker: "JPM",  name: "JPMorgan Chase",  sector: "Financials",              ret: 110 },
+      { ticker: "TSLA", name: "Tesla",           sector: "Consumer Discretionary",  ret: 95  },
+      { ticker: "AMD",  name: "AMD",             sector: "Technology",              ret: 89  },
+      { ticker: "AMZN", name: "Amazon",          sector: "Consumer Discretionary",  ret: 72  },
+      { ticker: "GOOG", name: "Alphabet",        sector: "Communication Services",  ret: 65  },
+      { ticker: "MSFT", name: "Microsoft",       sector: "Technology",              ret: 60  },
+      { ticker: "AAPL", name: "Apple",           sector: "Technology",              ret: 58  },
+      { ticker: "XOM",  name: "Exxon Mobil",     sector: "Energy",                  ret: 45  }
     ];
 
-    function renderChart(sector) {
-      const stocks = stockData[sector] || [];
-      const sorted = [...stocks].sort((a, b) => b.ret - a.ret);
-      const tickers = sorted.map(s => s.ticker);
-      const returns = sorted.map(s => s.ret);
-      const names = sorted.map(s => s.name);
-      const barColors = sorted.map((_, i) => colors[i % colors.length]);
+    const sectorColors = {
+      "Technology":             "#2563eb",
+      "Communication Services": "#7c3aed",
+      "Health Care":            "#059669",
+      "Financials":             "#d97706",
+      "Consumer Discretionary": "#dc2626",
+      "Energy":                 "#0891b2"
+    };
 
-      const trace = {
+    const sorted = [...allStocks].sort((a, b) => b.ret - a.ret);
+
+    // One trace per sector for proper legend
+    const sectors = [...new Set(sorted.map(s => s.sector))];
+    const traces = sectors.map(sector => {
+      const stocks = sorted.filter(s => s.sector === sector);
+      return {
         type: "bar",
-        x: tickers,
-        y: returns,
-        text: returns.map(r => `${r}%`),
+        name: sector,
+        x: stocks.map(s => s.ticker),
+        y: stocks.map(s => s.ret),
+        text: stocks.map(s => `${s.ret}%`),
         textposition: "outside",
-        marker: {
-          color: barColors,
-          line: { width: 0 }
-        },
-        hovertemplate: "<b>%{x}</b><br>%{customdata}<br>Total Return: <b>%{y}%</b><extra></extra>",
-        customdata: names
+        marker: { color: sectorColors[sector], line: { width: 0 } },
+        hovertemplate: "<b>%{x} — %{customdata[0]}</b><br>Sector: " + sector + "<br>Total Return: <b>%{y}%</b><extra></extra>",
+        customdata: stocks.map(s => [s.name])
       };
+    });
 
-      const layout = {
-        title: {
-          text: `Top Stocks in ${sector} by Total Return (2022–2025)`,
-          font: { size: 16, family: "Inter", weight: 600 }
-        },
-        xaxis: {
-          title: "Ticker",
-          tickfont: { size: 13 }
-        },
-        yaxis: {
-          title: "Total Return (%)",
-          tickfont: { size: 13 },
-          rangemode: "tozero"
-        },
-        plot_bgcolor: "white",
-        paper_bgcolor: "white",
-        margin: { t: 60, r: 30, b: 60, l: 70 },
-        font: { family: "Inter" },
-        showlegend: false
-      };
+    const layout = {
+      title: {
+        text: "All Stocks Ranked by Total Return (2022–2025)",
+        font: { size: 16, family: "Inter" }
+      },
+      xaxis: {
+        title: "Ticker",
+        tickfont: { size: 13 },
+        categoryorder: "array",
+        categoryarray: sorted.map(s => s.ticker)
+      },
+      yaxis: {
+        title: "Total Return (%)",
+        tickfont: { size: 13 },
+        rangemode: "tozero"
+      },
+      legend: {
+        title: { text: "Sector" },
+        orientation: "v",
+        x: 1.02,
+        y: 1
+      },
+      plot_bgcolor: "white",
+      paper_bgcolor: "white",
+      margin: { t: 60, r: 200, b: 60, l: 70 },
+      font: { family: "Inter" },
+      barmode: "group"
+    };
 
-      Plotly.newPlot("chart", [trace], layout, { responsive: true, displayModeBar: false });
-    }
-
-    const select = document.getElementById("sectorSelect");
-    renderChart(select.value);
-    select.addEventListener("change", () => renderChart(select.value));
+    Plotly.newPlot("chart", traces, layout, { responsive: true, displayModeBar: false });
   </script>
 </body>
 </html>
